@@ -3,15 +3,23 @@
   <metadata>
     <id>dn-dosnav</id>
     <version>1.51.0</version>
-    <title>Dos Navigator (DN) + DOSBox-X launcher</title>
-    <authors>RITLabs; package by You</authors>
-    <projectUrl>https://www.ritlabs.com/download/dn/</projectUrl>
-    <description>DN 1.51 (original DOS release) with a helper launcher that starts DN inside DOSBox-X. The launcher mounts the user's current directory as C: and DN files as D:, then runs DN.COM.</description>
-    <tags>dos dn dos-navigator file-manager dosbox-x portable tui</tags>
+    <title>DOS Navigator (DN) + DOSBox-X Launcher</title>
+    <authors>RITLabs</authors>
+    <owners>Foadsf</owners>
+    <projectUrl>https://github.com/Foadsf/dn-dosnav-chocolatey</projectUrl>
+    <projectSourceUrl>https://github.com/Foadsf/dn-dosnav-chocolatey</projectSourceUrl>
+    <packageSourceUrl>https://github.com/Foadsf/dn-dosnav-chocolatey</packageSourceUrl>
+    <docsUrl>https://www.ritlabs.com/download/dn/</docsUrl>
+    <description>DOS Navigator 1.51 is a classic dual-pane file manager for DOS, packaged with a convenient launcher that runs it in DOSBox-X.
+
+The launcher automatically mounts your current working directory as C: and the DN installation directory as D:, allowing you to manage files seamlessly.
+
+Simply navigate to any directory in your terminal and run 'dn' to start.</description>
+    <summary>Classic DOS dual-pane file manager with DOSBox-X integration</summary>
+    <tags>dos dn dos-navigator file-manager dosbox-x portable tui admin</tags>
     <licenseUrl>https://www.ritlabs.com/download/dn/</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <dependencies>
-      <!-- DOSBox-X from Chocolatey -->
       <dependency id="dosbox-x" />
     </dependencies>
   </metadata>
