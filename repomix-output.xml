@@ -1,0 +1,456 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+<additional_info>
+
+</additional_info>
+
+</file_summary>
+
+<directory_structure>
+.gitignore
+dn-dosnav.nuspec
+README.md
+test-detection.ps1
+test-launcher.bat
+tools/chocolateyinstall.ps1
+tools/chocolateyuninstall.ps1
+tools/VERIFICATION.txt
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path=".gitignore">
+# Chocolatey package artifacts
+*.nupkg
+*.nuspec.backup
+
+# Build artifacts
+tools/dn151.zip
+tools/dn151/
+tools/dn.bat
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Editors
+.vs/
+.vscode/
+*.swp
+*~
+</file>
+
+<file path="test-detection.ps1">
+# Test script to verify DOSBox-X detection logic
+Write-Host "=== Testing DOSBox-X Detection Logic ===" -ForegroundColor Cyan
+Write-Host ""
+
+$dosboxPath = $null
+
+# Check common installation paths
+$possiblePaths = @(
+    "C:\DOSBox-X\dosbox-x.exe",
+    "$env:ProgramFiles\DOSBox-X\dosbox-x.exe",
+    "${env:ProgramFiles(x86)}\DOSBox-X\dosbox-x.exe",
+    "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\joncampbell123.DOSBox-X_*\dosbox-x.exe",
+    "$env:USERPROFILE\scoop\apps\dosbox-x\current\dosbox-x.exe"
+)
+
+Write-Host "Checking predefined paths:" -ForegroundColor Yellow
+foreach ($path in $possiblePaths) {
+    Write-Host "  Checking: $path"
+    $resolved = Resolve-Path $path -ErrorAction SilentlyContinue
+    if ($resolved) {
+        $dosboxPath = $resolved.Path
+        Write-Host "  ✓ FOUND: $dosboxPath" -ForegroundColor Green
+        break
+    } else {
+        Write-Host "  ✗ Not found" -ForegroundColor DarkGray
+    }
+}
+
+# Check PATH
+if (-not $dosboxPath) {
+    Write-Host "`nChecking PATH environment:" -ForegroundColor Yellow
+    $pathCmd = Get-Command dosbox-x.exe -ErrorAction SilentlyContinue
+    if ($pathCmd) {
+        $dosboxPath = $pathCmd.Source
+        Write-Host "  ✓ FOUND in PATH: $dosboxPath" -ForegroundColor Green
+    } else {
+        Write-Host "  ✗ Not found in PATH" -ForegroundColor DarkGray
+    }
+}
+
+# Summary
+Write-Host "`n=== Results ===" -ForegroundColor Cyan
+if ($dosboxPath) {
+    Write-Host "SUCCESS: DOSBox-X detected at:" -ForegroundColor Green
+    Write-Host "  $dosboxPath"
+    
+    # Verify it actually exists and is executable
+    if (Test-Path $dosboxPath) {
+        Write-Host "`nFile verification:" -ForegroundColor Yellow
+        $fileInfo = Get-Item $dosboxPath
+        Write-Host "  Size: $($fileInfo.Length) bytes"
+        Write-Host "  Modified: $($fileInfo.LastWriteTime)"
+    }
+} else {
+    Write-Host "FAILED: No DOSBox-X installation detected" -ForegroundColor Red
+    Write-Host "`nPlease verify DOSBox-X is installed via one of:" -ForegroundColor Yellow
+    Write-Host "  - WinGet:     winget install joncampbell123.DOSBox-X"
+    Write-Host "  - Chocolatey: choco install dosbox-x"
+    Write-Host "  - Scoop:      scoop install dosbox-x"
+}
+</file>
+
+<file path="test-launcher.bat">
+@echo off
+setlocal
+
+echo === Testing Batch Launcher Detection Logic ===
+echo.
+
+REM Check for DOSBox-X in various locations
+set "_DBX="
+
+REM Check Chocolatey installation
+echo Checking: C:\DOSBox-X\dosbox-x.exe
+if exist "C:\DOSBox-X\dosbox-x.exe" (
+    set "_DBX=C:\DOSBox-X\dosbox-x.exe"
+    echo FOUND: C:\DOSBox-X\dosbox-x.exe
+    goto :found
+)
+echo Not found
+
+echo Checking: %ProgramFiles%\DOSBox-X\dosbox-x.exe
+if exist "%ProgramFiles%\DOSBox-X\dosbox-x.exe" (
+    set "_DBX=%ProgramFiles%\DOSBox-X\dosbox-x.exe"
+    echo FOUND: %ProgramFiles%\DOSBox-X\dosbox-x.exe
+    goto :found
+)
+echo Not found
+
+echo Checking: %ProgramFiles(x86)%\DOSBox-X\dosbox-x.exe
+if exist "%ProgramFiles(x86)%\DOSBox-X\dosbox-x.exe" (
+    set "_DBX=%ProgramFiles(x86)%\DOSBox-X\dosbox-x.exe"
+    echo FOUND: %ProgramFiles(x86)%\DOSBox-X\dosbox-x.exe
+    goto :found
+)
+echo Not found
+
+REM Check PATH
+echo Checking PATH...
+for %%F in (dosbox-x.exe) do if not "%%~$PATH:F"=="" (
+    set "_DBX=%%~$PATH:F"
+    echo FOUND in PATH: %%~$PATH:F
+    goto :found
+)
+echo Not found in PATH
+
+REM Check WinGet installation
+echo Checking WinGet location...
+for /d %%D in ("%LOCALAPPDATA%\Microsoft\WinGet\Packages\joncampbell123.DOSBox-X_*") do (
+    if exist "%%D\dosbox-x.exe" (
+        set "_DBX=%%D\dosbox-x.exe"
+        echo FOUND: %%D\dosbox-x.exe
+        goto :found
+    )
+)
+echo Not found
+
+REM Check Scoop installation
+echo Checking: %USERPROFILE%\scoop\apps\dosbox-x\current\dosbox-x.exe
+if exist "%USERPROFILE%\scoop\apps\dosbox-x\current\dosbox-x.exe" (
+    set "_DBX=%USERPROFILE%\scoop\apps\dosbox-x\current\dosbox-x.exe"
+    echo FOUND: %USERPROFILE%\scoop\apps\dosbox-x\current\dosbox-x.exe
+    goto :found
+)
+echo Not found
+
+:found
+echo.
+echo === Results ===
+if "%_DBX%"=="" (
+    echo FAILED: No DOSBox-X detected
+    exit /b 1
+) else (
+    echo SUCCESS: DOSBox-X detected at:
+    echo   %_DBX%
+)
+
+endlocal
+</file>
+
+<file path="tools/chocolateyuninstall.ps1">
+$ErrorActionPreference = 'SilentlyContinue'
+$toolsDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
+Remove-Item -Recurse -Force (Join-Path $toolsDir 'dn151') -ErrorAction SilentlyContinue
+Remove-Item -Force (Join-Path $toolsDir 'dn151.zip') -ErrorAction SilentlyContinue
+Remove-Item -Force (Join-Path $toolsDir 'dn.bat') -ErrorAction SilentlyContinue
+</file>
+
+<file path="tools/VERIFICATION.txt">
+DN 1.51 is downloaded from the official vendor:
+https://www.ritlabs.com/download/dn/dn151.zip
+
+To verify:
+1) Download the ZIP manually and compute hash:
+   - PowerShell: Get-FileHash -Algorithm SHA256 dn151.zip
+2) Put the value as 'sha256:...' in chocolateyinstall.ps1 ($checksum).
+
+The launcher batch only calls locally installed DOSBox-X and the DN.COM
+extracted to tools\dn151. No system changes are made beyond Chocolatey files.
+</file>
+
+<file path="dn-dosnav.nuspec">
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>dn-dosnav</id>
+    <version>1.51.0</version>
+    <title>DOS Navigator (DN) + DOSBox-X Launcher</title>
+    <authors>RITLabs</authors>
+    <owners>Foadsf</owners>
+    <projectUrl>https://github.com/Foadsf/dn-dosnav-chocolatey</projectUrl>
+    <projectSourceUrl>https://github.com/Foadsf/dn-dosnav-chocolatey</projectSourceUrl>
+    <packageSourceUrl>https://github.com/Foadsf/dn-dosnav-chocolatey</packageSourceUrl>
+    <docsUrl>https://www.ritlabs.com/download/dn/</docsUrl>
+    <description>DOS Navigator 1.51 is a classic dual-pane file manager for DOS, packaged with a convenient launcher that runs it in DOSBox-X.
+
+The launcher automatically mounts your current working directory as C: and the DN installation directory as D:, allowing you to manage files seamlessly.
+
+Simply navigate to any directory in your terminal and run 'dn' to start.</description>
+    <summary>Classic DOS dual-pane file manager with DOSBox-X integration</summary>
+    <tags>dos dn dos-navigator file-manager dosbox-x portable tui admin</tags>
+    <licenseUrl>https://www.ritlabs.com/download/dn/</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <dependencies>
+      <dependency id="dosbox-x" />
+    </dependencies>
+  </metadata>
+</package>
+</file>
+
+<file path="README.md">
+# dn-dosnav - DOS Navigator for Windows
+
+A Chocolatey package that installs DOS Navigator 1.51 with a launcher that automatically starts it in DOSBox-X.
+
+## Installation
+
+```powershell
+choco install dn-dosnav
+```
+
+## Usage
+
+Navigate to any directory and run:
+
+```cmd
+dn
+```
+
+DOS Navigator will launch in DOSBox-X with:
+- **C:** mounted to your current working directory
+- **D:** mounted to the DN installation directory
+
+## Requirements
+
+- DOSBox-X (automatically installed as a dependency)
+
+## Features
+
+- Dual-pane file manager
+- Full DOS Navigator 1.51 functionality
+- Automatic directory mounting
+- Portable - works from any location
+
+## Development and Testing
+
+### Building from Source
+
+```powershell
+choco pack
+choco install dn-dosnav -s "." -y
+```
+
+### Testing with Sandboxie-Plus
+
+When testing Chocolatey packages in Sandboxie-Plus, be aware that Chocolatey caches installed packages. To ensure you're testing the latest version after making changes:
+
+1. **On the host machine**, delete the cached package directory:
+   ```powershell
+   Remove-Item -Recurse -Force "C:\Sandbox\<User>\<BoxName>\user\all\chocolatey\lib\dn-dosnav" -ErrorAction SilentlyContinue
+   ```
+
+2. **Inside the sandbox**, rebuild and reinstall:
+   ```powershell
+   choco uninstall dn-dosnav -y
+   choco pack
+   choco install dn-dosnav -s "." -y --force
+   ```
+
+**Helper script** - Create `test-install.ps1` for faster iteration:
+
+```powershell
+# Clean up completely
+choco uninstall dn-dosnav -y 2>$null
+Remove-Item -Recurse -Force "$env:ChocolateyInstall\lib\dn-dosnav" -ErrorAction SilentlyContinue
+
+# Build fresh package
+choco pack
+
+# Install from local source
+choco install dn-dosnav -s "." -y --force
+```
+
+**Why this is necessary:** Chocolatey's `--force` flag reinstalls the package but doesn't always clear the cached files, especially in sandboxed environments. Changes to `chocolateyinstall.ps1` won't take effect until the cache is manually cleared.
+
+## License
+
+DOS Navigator is created by RITLabs. Package maintained by Foadsf.
+
+## Links
+
+- [Package on Chocolatey](https://community.chocolatey.org/packages/dn-dosnav)
+- [Source Repository](https://github.com/Foadsf/dn-dosnav-chocolatey)
+- [DOS Navigator Official Site](https://www.ritlabs.com/download/dn/)
+</file>
+
+<file path="tools/chocolateyinstall.ps1">
+$ErrorActionPreference = 'Stop'
+
+$toolsDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
+
+Write-Host "Starting installation..."
+
+# Check for existing DOSBox-X installation from various sources
+$dosboxPath = $null
+
+# Check common installation paths
+$possiblePaths = @(
+    "C:\DOSBox-X\dosbox-x.exe",
+    "$env:ProgramFiles\DOSBox-X\dosbox-x.exe",
+    "${env:ProgramFiles(x86)}\DOSBox-X\dosbox-x.exe",
+    "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\joncampbell123.DOSBox-X_*\dosbox-x.exe",
+    "$env:USERPROFILE\scoop\apps\dosbox-x\current\dosbox-x.exe"
+)
+
+foreach ($path in $possiblePaths) {
+    $resolved = Resolve-Path $path -ErrorAction SilentlyContinue
+    if ($resolved) {
+        $dosboxPath = $resolved.Path
+        Write-Host "Found existing DOSBox-X at: $dosboxPath"
+        break
+    }
+}
+
+# Check PATH
+if (-not $dosboxPath) {
+    $pathCmd = Get-Command dosbox-x.exe -ErrorAction SilentlyContinue
+    if ($pathCmd) {
+        $dosboxPath = $pathCmd.Source
+        Write-Host "Found DOSBox-X in PATH: $dosboxPath"
+    }
+}
+
+# If no existing installation found, DOSBox-X will be installed via dependency
+if (-not $dosboxPath) {
+    Write-Host "No existing DOSBox-X installation found. It will be installed as a dependency."
+}
+
+# Download DN
+$params = @{
+    PackageName = 'dn-dosnav'
+    Url = 'https://www.ritlabs.com/download/dn/dn151.zip'
+    FileFullPath = (Join-Path $toolsDir 'dn151.zip')
+    Checksum = 'F6DEE3904945A2F390F8576A5D18D83446F4554E43D6F0A3C75F8AA5B570D7D9'
+    ChecksumType = 'sha256'
+}
+
+Get-ChocolateyWebFile @params
+
+Get-ChocolateyUnzip -FileFullPath (Join-Path $toolsDir 'dn151.zip') -Destination (Join-Path $toolsDir 'dn151')
+
+# Create launcher that detects DOSBox-X dynamically
+$launcher = @'
+@echo off
+setlocal
+
+REM Check for DOSBox-X in various locations
+set "_DBX="
+
+REM Check Chocolatey installation
+if exist "C:\DOSBox-X\dosbox-x.exe" set "_DBX=C:\DOSBox-X\dosbox-x.exe"
+if exist "%ProgramFiles%\DOSBox-X\dosbox-x.exe" set "_DBX=%ProgramFiles%\DOSBox-X\dosbox-x.exe"
+if exist "%ProgramFiles(x86)%\DOSBox-X\dosbox-x.exe" set "_DBX=%ProgramFiles(x86)%\DOSBox-X\dosbox-x.exe"
+
+REM Check PATH
+if "%_DBX%"=="" for %%F in (dosbox-x.exe) do if not "%%~$PATH:F"=="" set "_DBX=%%~$PATH:F"
+
+REM Check WinGet installation (common location)
+if "%_DBX%"=="" for /d %%D in ("%LOCALAPPDATA%\Microsoft\WinGet\Packages\joncampbell123.DOSBox-X_*") do (
+    if exist "%%D\dosbox-x.exe" set "_DBX=%%D\dosbox-x.exe"
+)
+
+REM Check Scoop installation
+if "%_DBX%"=="" if exist "%USERPROFILE%\scoop\apps\dosbox-x\current\dosbox-x.exe" set "_DBX=%USERPROFILE%\scoop\apps\dosbox-x\current\dosbox-x.exe"
+
+if "%_DBX%"=="" (
+    echo ERROR: DOSBox-X not found. Please install it via:
+    echo   - Chocolatey: choco install dosbox-x
+    echo   - WinGet:     winget install joncampbell123.DOSBox-X
+    echo   - Scoop:      scoop install dosbox-x
+    exit /b 1
+)
+
+set "_DNPATH=%~dp0dn151"
+"%_DBX%" -c "mount c \"%CD%\"" -c "mount d \"%_DNPATH%\"" -c "c:" -c "d:\dn.com"
+endlocal
+'@
+
+$batPath = Join-Path $toolsDir 'dn.bat'
+Set-Content -LiteralPath $batPath -Value $launcher -Encoding ASCII
+
+Write-Host "Creating shim for dn.bat..."
+Install-BinFile -Name 'dn' -Path $batPath
+</file>
+
+</files>

@@ -72,6 +72,41 @@ choco install dn-dosnav -s "." -y --force
 
 **Why this is necessary:** Chocolatey's `--force` flag reinstalls the package but doesn't always clear the cached files, especially in sandboxed environments. Changes to `chocolateyinstall.ps1` won't take effect until the cache is manually cleared.
 
+### Testing in Sandboxie-Plus (Safe Environment)
+
+To avoid modifying your host system during testing, you can use **Sandboxie-Plus** to install and run the Chocolatey package in an isolated sandbox.
+
+#### Steps
+
+1. **Create a new sandbox** (example: `DNTest`) from the Sandboxie-Plus GUI or command line.
+   ```powershell
+   "C:\Program Files\Sandboxie-Plus\Start.exe" /box:DNTest powershell.exe
+````
+
+2. **Inside the sandboxed PowerShell**, install your local package:
+
+   ```powershell
+   cd C:\path\to\repo
+   choco pack
+   choco install dn-dosnav -s "." -y
+   ```
+
+3. **Run DN**:
+
+   ```powershell
+   dn
+   ```
+
+   This will launch DOS Navigator inside DOSBox-X, with your working directory mounted as **C:**.
+
+#### Why use Sandboxie-Plus?
+
+* Prevents unwanted changes to your host Chocolatey installation or PATH.
+* Allows repeatable, disposable test environments.
+* Lets you validate installation scripts, dependencies, and shims as if on a fresh Windows system.
+
+> 💡 Tip: If you change `chocolateyinstall.ps1`, remember Chocolatey caches package files. Clear the sandbox cache (`C:\Sandbox\<User>\<BoxName>\user\all\chocolatey\lib\dn-dosnav`) or use `--force` to ensure updates take effect.
+
 ## License
 
 DOS Navigator is created by RITLabs. Package maintained by Foadsf.
