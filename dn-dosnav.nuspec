@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>dn-dosnav</id>
+    <version>1.51.0</version>
+    <title>Dos Navigator (DN) + DOSBox-X launcher</title>
+    <authors>RITLabs; package by You</authors>
+    <projectUrl>https://www.ritlabs.com/download/dn/</projectUrl>
+    <description>DN 1.51 (original DOS release) with a helper launcher that starts DN inside DOSBox-X. The launcher mounts the user's current directory as C: and DN files as D:, then runs DN.COM.</description>
+    <tags>dos dn dos-navigator file-manager dosbox-x portable tui</tags>
+    <licenseUrl>https://www.ritlabs.com/download/dn/</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <dependencies>
+      <!-- DOSBox-X from Chocolatey -->
+      <dependency id="dosbox-x" />
+    </dependencies>
+  </metadata>
+</package>

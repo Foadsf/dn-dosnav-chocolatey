@@ -1,0 +1,10 @@
+DN 1.51 is downloaded from the official vendor:
+https://www.ritlabs.com/download/dn/dn151.zip
+
+To verify:
+1) Download the ZIP manually and compute hash:
+   - PowerShell: Get-FileHash -Algorithm SHA256 dn151.zip
+2) Put the value as 'sha256:...' in chocolateyinstall.ps1 ($checksum).
+
+The launcher batch only calls locally installed DOSBox-X and the DN.COM
+extracted to tools\dn151. No system changes are made beyond Chocolatey files.

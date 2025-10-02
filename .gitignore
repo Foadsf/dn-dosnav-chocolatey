@@ -1,0 +1,18 @@
+# Chocolatey package artifacts
+*.nupkg
+*.nuspec.backup
+
+# Build artifacts
+tools/dn151.zip
+tools/dn151/
+tools/dn.bat
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Editors
+.vs/
+.vscode/
+*.swp
+*~
