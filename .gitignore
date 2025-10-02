@@ -16,3 +16,6 @@ Desktop.ini
 .vscode/
 *.swp
 *~
+
+# misc
+repomix-output.xml
